@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Minecraft MP3 Playlist</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2em;
+      background: #f4f4f4;
+    }
+    h1 {
+      margin-bottom: 0.5em;
+    }
+    button {
+      margin: 0.5em;
+      padding: 0.5em 1em;
+      font-size: 1em;
+    }
+    #status {
+      margin-top: 1em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Minecraft Music Player 🎵</h1>
+
+  <div>
+    <button id="playPauseBtn">⏸️ Pause</button>
+    <button id="nextBtn">⏭️ Next</button>
+    <button id="shuffleBtn">🔀 Shuffle: Off</button>
+  </div>
+
+  <p id="status">Loading playlist...</p>
+
+  <script>
+    const audioFiles = [
+      "A1-08.mp3", "calm2.mp3", "calm3.mp3",
+      "hal1.mp3", "hal2.mp3", "hal3.mp3",
+      "nuance1.mp3", "nuance2.mp3", "nuance3.mp3",
+      "piano1.mp3", "piano2.mp3", "piano3.mp3"
+    ];
+
+    let playlist = [...audioFiles];
+    let currentTrack = 0;
+    let isPlaying = true;
+    let shuffle = false;
+
+    const audio = new Audio();
+    const statusText = document.getElementById("status");
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+
+    function playTrack(index) {
+      currentTrack = index;
+      audio.src = playlist[currentTrack];
+      audio.play();
+      isPlaying = true;
+      playPauseBtn.textContent = "⏸️ Pause";
+      statusText.textContent = "Playing: " + playlist[currentTrack];
+    }
+
+    function playNextTrack() {
+      currentTrack++;
+      if (currentTrack >= playlist.length) {
+        currentTrack = 0; // Loop to start
+      }
+      playTrack(currentTrack);
+    }
+
+    function togglePlayPause() {
+      if (isPlaying) {
+        audio.pause();
+        playPauseBtn.textContent = "▶️ Play";
+        statusText.textContent = "Paused: " + playlist[currentTrack];
+      } else {
+        audio.play();
+        playPauseBtn.textContent = "⏸️ Pause";
+        statusText.textContent = "Playing: " + playlist[currentTrack];
+      }
+      isPlaying = !isPlaying;
+    }
+
+    function toggleShuffle() {
+      shuffle = !shuffle;
+      shuffleBtn.textContent = shuffle ? "🔀 Shuffle: On" : "🔀 Shuffle: Off";
+
+      if (shuffle) {
+        // Shuffle playlist using Fisher-Yates
+        playlist = [...audioFiles];
+        for (let i = playlist.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
+        }
+      } else {
+        playlist = [...audioFiles];
+      }
+
+      currentTrack = 0;
+      playTrack(currentTrack);
+    }
+
+    // Event listeners
+    audio.addEventListener("ended", playNextTrack);
+    playPauseBtn.addEventListener("click", togglePlayPause);
+    nextBtn.addEventListener("click", playNextTrack);
+    shuffleBtn.addEventListener("click", toggleShuffle);
+
+    window.onload = () => {
+      playTrack(currentTrack);
+    };
+  </script>
+</body>
+</html>
