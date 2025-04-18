@@ -22,15 +22,29 @@
       margin-top: 1em;
       font-weight: bold;
     }
+    #seekBarContainer {
+      margin-top: 1.5em;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #seekBar {
+      width: 100%;
+    }
   </style>
 </head>
 <body>
   <h1>Minecraft Music Player 🎵</h1>
 
   <div>
+    <button id="prevBtn">⏮️ Previous</button>
     <button id="playPauseBtn">⏸️ Pause</button>
     <button id="nextBtn">⏭️ Next</button>
     <button id="shuffleBtn">🔀 Shuffle: Off</button>
+  </div>
+
+  <div id="seekBarContainer">
+    <input type="range" id="seekBar" value="0" min="0" max="100" step="1">
   </div>
 
   <p id="status">Loading playlist...</p>
@@ -73,7 +87,9 @@
     const statusText = document.getElementById("status");
     const playPauseBtn = document.getElementById("playPauseBtn");
     const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
     const shuffleBtn = document.getElementById("shuffleBtn");
+    const seekBar = document.getElementById("seekBar");
 
     function playTrack(index) {
       currentTrack = index;
@@ -86,9 +102,13 @@
 
     function playNextTrack() {
       currentTrack++;
-      if (currentTrack >= playlist.length) {
-        currentTrack = 0; // Loop to start
-      }
+      if (currentTrack >= playlist.length) currentTrack = 0;
+      playTrack(currentTrack);
+    }
+
+    function playPrevTrack() {
+      currentTrack--;
+      if (currentTrack < 0) currentTrack = playlist.length - 1;
       playTrack(currentTrack);
     }
 
@@ -108,26 +128,34 @@
     function toggleShuffle() {
       shuffle = !shuffle;
       shuffleBtn.textContent = shuffle ? "🔀 Shuffle: On" : "🔀 Shuffle: Off";
-
+      playlist = [...audioFiles];
       if (shuffle) {
-        // Shuffle playlist using Fisher-Yates
-        playlist = [...audioFiles];
         for (let i = playlist.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
         }
-      } else {
-        playlist = [...audioFiles];
       }
-
       currentTrack = 0;
       playTrack(currentTrack);
     }
 
-    // Event listeners
+    // Update seek bar as song plays
+    audio.addEventListener("timeupdate", () => {
+      if (!isNaN(audio.duration)) {
+        seekBar.max = Math.floor(audio.duration);
+        seekBar.value = Math.floor(audio.currentTime);
+      }
+    });
+
+    // Seek when user adjusts bar
+    seekBar.addEventListener("input", () => {
+      audio.currentTime = seekBar.value;
+    });
+
     audio.addEventListener("ended", playNextTrack);
     playPauseBtn.addEventListener("click", togglePlayPause);
     nextBtn.addEventListener("click", playNextTrack);
+    prevBtn.addEventListener("click", playPrevTrack);
     shuffleBtn.addEventListener("click", toggleShuffle);
 
     window.onload = () => {
