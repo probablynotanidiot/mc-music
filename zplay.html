@@ -41,6 +41,7 @@
     <button id="playPauseBtn">⏸️ Pause</button>
     <button id="nextBtn">⏭️ Next</button>
     <button id="shuffleBtn">🔀 Shuffle: Off</button>
+    <button id="repeatBtn">🔁 Repeat: Off</button>
   </div>
 
   <div id="seekBarContainer">
@@ -82,6 +83,7 @@
     let currentTrack = 0;
     let isPlaying = true;
     let shuffle = false;
+    let repeat = false;
 
     const audio = new Audio();
     const statusText = document.getElementById("status");
@@ -89,6 +91,7 @@
     const nextBtn = document.getElementById("nextBtn");
     const prevBtn = document.getElementById("prevBtn");
     const shuffleBtn = document.getElementById("shuffleBtn");
+    const repeatBtn = document.getElementById("repeatBtn");
     const seekBar = document.getElementById("seekBar");
 
     function playTrack(index) {
@@ -139,7 +142,11 @@
       playTrack(currentTrack);
     }
 
-    // Update seek bar as song plays
+    function toggleRepeat() {
+      repeat = !repeat;
+      repeatBtn.textContent = repeat ? "🔁 Repeat: On" : "🔁 Repeat: Off";
+    }
+
     audio.addEventListener("timeupdate", () => {
       if (!isNaN(audio.duration)) {
         seekBar.max = Math.floor(audio.duration);
@@ -147,16 +154,23 @@
       }
     });
 
-    // Seek when user adjusts bar
     seekBar.addEventListener("input", () => {
       audio.currentTime = seekBar.value;
     });
 
-    audio.addEventListener("ended", playNextTrack);
+    audio.addEventListener("ended", () => {
+      if (repeat) {
+        playTrack(currentTrack);
+      } else {
+        playNextTrack();
+      }
+    });
+
     playPauseBtn.addEventListener("click", togglePlayPause);
     nextBtn.addEventListener("click", playNextTrack);
     prevBtn.addEventListener("click", playPrevTrack);
     shuffleBtn.addEventListener("click", toggleShuffle);
+    repeatBtn.addEventListener("click", toggleRepeat);
 
     window.onload = () => {
       playTrack(currentTrack);
